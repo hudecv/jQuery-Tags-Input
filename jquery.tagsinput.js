@@ -186,6 +186,7 @@
       'delimiter':',',
       'unique':true,
       removeWithBackspace:true,
+      removeSingle: false,
       placeholderColor:'#666666',
       autosize: true,
       comfortZone: 20,
@@ -208,6 +209,8 @@
 				input_wrapper: '#'+id+'_addTag',
 				fake_input: '#'+id+'_tag'
 			},settings);
+
+			var canRemoveTag = true;
 	
 			delimiter[id] = data.delimiter;
 			
@@ -302,17 +305,28 @@
             
           			}
 				});
-				//Delete last tag on backspace
-				data.removeWithBackspace && $(data.fake_input).bind('keydown', function(event)
+				data.removeSingle && data.removeWithBackspace && $(data.fake_input).bind('keyup', function(event)
 				{
 					if(event.keyCode == 8 && $(this).val() == '')
 					{
-						 event.preventDefault();
-						 var last_tag = $(this).closest('.tagsinput').find('.tag:last').text();
-						 var id = $(this).attr('id').replace(/_tag$/, '');
-						 last_tag = last_tag.replace(/[\s]+x$/, '');
-						 $('#' + id).removeTag(escape(last_tag));
-						 $(this).trigger('focus');
+						canRemoveTag = true;
+					}
+				});
+				//Delete last tag on backspace
+				data.removeWithBackspace && $(data.fake_input).bind('keydown', function(event)
+				{
+					if(event.keyCode == 8 && canRemoveTag)
+					{
+						if($(this).val() == '')
+						{
+							event.preventDefault();
+						 	var last_tag = $(this).closest('.tagsinput').find('.tag:last').text();
+						 	var id = $(this).attr('id').replace(/_tag$/, '');
+						 	last_tag = last_tag.replace(/[\s]+X$/, '');
+						 	$('#' + id).removeTag(escape(last_tag));
+						 	$(this).trigger('focus');	
+						}
+						canRemoveTag = !data.removeSingle;
 					}
 				});
 				$(data.fake_input).blur();
